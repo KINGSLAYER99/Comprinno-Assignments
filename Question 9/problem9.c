@@ -77,7 +77,7 @@ int main() {
                 printf("Enter Space separated integers of array values:\n");
                 for (int i = 0; i < n; i++) {
                     scanf("%d%*c", &temp);
-                    if (temp >= 1 &&  temp <= 10^5) {//checking if the value is within the array value constraints
+                    if (temp >= 1 &&  temp <= 100000) {//checking if the value is within the array value constraints
                         arr[i] = temp;//if yes, storing the value to array
                         if (temp < minElement) {//calculating the minElement in the same loop
                             minElement = temp;

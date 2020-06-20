@@ -47,14 +47,14 @@ public class Controller {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         //number of test cases is within integer range, hence taken integer.
-        //System.out.println("Please enter number of Test cases:");
+        System.out.println("Please enter number of Test cases:");
         int T = scanner.nextInt();//user input for test cases
         scanner.nextLine();//so that all the spaces of integer line gets eliminated
 
         int a,b,n;//variables needed for user input
         if (T >= 1 && T <= 100) {//checking Test case constraints
             while (T-- > 0) {//for each test case
-                //System.out.println("Please enter A,B,N as space separated characters:");
+                System.out.println("Please enter A,B,N as space separated characters:");
                 a = scanner.nextInt();
                 b = scanner.nextInt();
                 n = scanner.nextInt();
@@ -65,7 +65,7 @@ public class Controller {
                         a = a * 2;
                     }
                     int result = (Math.max(a, b))/(Math.min(a, b));//result based on the logic given in question
-                    //System.out.println("Answer of Integer Division is:");
+                    System.out.println("Answer of Integer Division is:");
                     System.out.println(result);
                 } else {
                     System.out.println("A,B,N constraints violated!");

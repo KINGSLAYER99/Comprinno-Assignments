@@ -18,15 +18,25 @@ Constraints
 1 <= T <= 10
 1 <= |S| <= 10^5
 S contains only lower case alphabets: a, b, …, z
+
 Sample Input:
-3
-aaaabccc
-aabbcc
+7
+abc
+aaabbccddeeffggggg
 ppppmmnnoooopp
+aabbcc
+abbbcccdddd
+aaaaaaaaaaaaaaaabbbbbb
+aaaabbbb
+
 Sample Output:
-Dynamic
 Not
-Dynamic
+Dynamic since f(g) = f(b) + f(a) for C= {c,d,e,f,a,b,g}
+Dynamic since f(p) = f(o) + f(n) for C= {m,o,n,p}
+Not
+Dynamic since f(d) = f(b) + f(a) for C= {c,a,b,d}
+Dynamic since unique < 3
+Dynamic since unique < 3
 */
 
 //Pseudocode:
@@ -35,10 +45,12 @@ Dynamic
  2) for every test case,
     2.1) input character string from user. Validate its size according to constraints
     2.2) if the size <=2, there will be <3 unique characters, hence it will be dynamic
-    2.3)if not,convert string to character array, sort the array, check the occurence of each unique character
-    and store that occurence count of each character in arraylist. Sort the arraylist
-    2.4) if arraylist size <= 2, it means number of unique characters < 3, hence return "Dynamic"
-    2.5) else, check if arraylist[i] + arraylist[i+1] == arraylist[i + 2]. If yes, its dynamic
+    2.3)if not,convert string to character array, create Int array of size of lower case alphabets count(26), check the occurence of each alphabet in the input string and update it in that int Array
+    2.4)Remove all those values which are 0 in that array, and put the rest of values to Arraylist. if arraylist size <= 2, it means number of unique characters < 3, hence return "Dynamic"
+    2.5) If not, check if for every i from 0 to arraylist size -2,
+    		for every j from i+1 to arraylist size -1,
+    		    for every k from j+1 to arraylist size
+			if arraylist[i] + arraylist[j] == arraylist[k]. If yes, its dynamic
     2.6) for entire arraylist if the above condition doesnt satisfy return "Not"
 
  */
@@ -49,7 +61,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
-public class Controller {
+public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -62,13 +74,20 @@ public class Controller {
                 System.out.println("Enter the String:");
                     String input = scanner.next();
                     if (input.length() >= 1 && input.length() <= 100000) {//checking String size constraints
-                        if (input.length() <= 2) {//number of unique characters < 3
+                        if (input.length() <= 2) {//number of characters < 3
                             System.out.println("Dynamic");
                         }
                         else {
                             char[] userString = input.toCharArray();//for faster operations
-                            Arrays.sort(userString);//so that counting of occurences of all characters becomes easy
-                            String result = validateDynamic(userString);
+     // since only lower case letters are gonna be used, hence constructing an int array of that size to store count of each lower case character
+                            int[] occurences = new int[26]; 
+     // For each character in character array, update the character's occurence count in "occurences" array.
+                            for (int i = 0; i < userString.length; i++) {
+                                occurences[userString[i] - 97]++;
+                            }
+     // Sort this finite array, this is better as it avoids sorting the entire string of size 10^5, it will always sort this finite size
+                            Arrays.sort(occurences);//so that counting of occurences of all characters becomes easy
+                            String result = validateDynamic(occurences);
                             System.out.println(result);
                         }
 
@@ -84,38 +103,58 @@ public class Controller {
     }
 
     //function validates if string is dynamic or not
-    private static String validateDynamic(char[] userString) {
-        ArrayList<Integer> occurenceCount;
-             occurenceCount = generateOccurenceCount(userString);
-             if (occurenceCount.size() <=2) {//number of unique characters < 3
+    private static String validateDynamic(int[] occurences) {
+        ArrayList<Integer> occurenceCount = new ArrayList<Integer>();
+        // Some indexes may have 0 value as those characters may not exist in the input string, hence removing them, and adding rest to ArrayList
+        for (int i = 0; i < 26; i++) {
+            if (occurences[i] != 0) {
+                occurenceCount.add(occurences[i]);
+            }
+        }
+//             System.out.println(occurenceCount); 
+//             System.out.println(occurenceCount.size()); 
+
+             if (occurenceCount.size() <= 2) {//number of unique characters < 3
                  return  "Dynamic";
              }
+
+// Extra Optimization
+// This arraylist contains only Occurence Counts which are not repeated more than twice, since if those occurences are repeated lets say for 3 times, x != x+x any time, and more than 2 x's aren't needed for comparison with rest of the Occurence Counts             
+        ArrayList<Integer> adjustedCount = new ArrayList<Integer>();
+        // Traverse through the first list 
+        int maximum = 1;
+        for (Integer element : occurenceCount) { 
+  
+            // If this element is not present in newList 
+            // then add it 
+            if (!adjustedCount.contains(element)) { 
+  
+                adjustedCount.add(element);
+                maximum = 1;
+            } 
+            // Only add it if only 1 duplicate exists, so if counts are 4,2,2,2,2,3 it will add 4,2,2,3 only
+            else if (adjustedCount.contains(element) && maximum == 1) { 
+  
+                adjustedCount.add(element);
+                maximum = 2;
+            } 
+        }
+//        System.out.println(adjustedCount); 
+
+// check every index with every other index of this finite size ArrayList. This covers all permutations
+        occurenceCount = adjustedCount;
         for (int i = 0; i < occurenceCount.size() - 2; i++) {
-            if ((occurenceCount.get(i) + occurenceCount.get(i + 1)) == occurenceCount.get(i + 2)) {//fibonacci formula
-                return "Dynamic";
+            for (int j = i + 1; j < occurenceCount.size() - 1; j++) {
+                for (int k = j + 1; k < occurenceCount.size(); k++) {
+//		     System.out.println("i:" + occurenceCount.get(i) + " j:" + occurenceCount.get(j) + " k:" + occurenceCount.get(k)); 
+                    if ((occurenceCount.get(i) + occurenceCount.get(j)) == occurenceCount.get(k)) {//fibonacci formula
+                        return "Dynamic";
+                    }
+                }
             }
         }
         return "Not";//formula wasn't applied, thus not dynamic
     }
 
-    private static ArrayList<Integer> generateOccurenceCount(char[] userString) {
-        ArrayList<Integer> occurenceCount = new ArrayList<>();
-        int count = 0;
-        char current = userString[0];
-        for (char c : userString) {
-            if (c == current) {//it means, I am counting the same character
-                count++;
-            } else {
-                /*this is different character than previous, which means all occurences of previous character are done.
-                So, store the occurenceCount of previous character before starting with new character
-                */
-                occurenceCount.add(count);
-                current = c;//store this new character to compare it for further occurences
-                count = 1;//this is the first occurence, hence count is 1
-            }
-        }
-        occurenceCount.add(count);//storing the last character occurence count
-        Collections.sort(occurenceCount);//sorting to recognise the fibonacci permutation in the arraylist
-        return occurenceCount;
-    }
 }
+

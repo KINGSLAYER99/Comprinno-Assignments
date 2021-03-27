@@ -78,8 +78,10 @@ int calculateMaxArea(int* arr, int n) {
         if (arr[i] == arr[i + 1]) {
             if (a == 0) {// this means even first pair isn't filled
                 a = arr[i];
+                i = i + 1;
             } else if (b == 0) {// first pair done, second to be done now
                 b = arr[i];
+                i = i + 1;
                 break;
             }
         }
